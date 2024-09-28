@@ -1,3 +1,6 @@
+import datetime
+from typing import Optional
+
 from YaContestSubmission import YaContestSubmission
 import pandas as pd
 
@@ -6,13 +9,18 @@ class SubmissionAnalyzer:
     def get_statistics(self,
                        group_list: list[str],
                        submissions: list[YaContestSubmission],
-                       problem_list: list[str]):
+                       problem_list: list[str],
+                       deadline: Optional[datetime.datetime] = None):
         df = pd.DataFrame(columns=problem_list,
                           index=group_list)
 
         for submission in submissions:
             if submission.author_name in group_list:
-                if df.loc[submission.author_name, submission.problem_alias] != 1:
+                if deadline is not None:
+                    is_delayed = (datetime.datetime.fromisoformat(submission.submission_time[:-1]) > deadline)
+                else:
+                    is_delayed = False
+                if df.loc[submission.author_name, submission.problem_alias] != 1 and not is_delayed:
                     df.loc[submission.author_name, submission.problem_alias] = int(submission.is_submission_correct())
 
         df = df.fillna(0)
