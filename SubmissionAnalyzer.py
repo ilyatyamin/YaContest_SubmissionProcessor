@@ -12,7 +12,8 @@ class SubmissionAnalyzer:
 
         for submission in submissions:
             if submission.author_name in group_list:
-                df.loc[submission.author_name, submission.problem_alias] = int(submission.is_submission_correct())
+                if df.loc[submission.author_name, submission.problem_alias] != 1:
+                    df.loc[submission.author_name, submission.problem_alias] = int(submission.is_submission_correct())
 
         df = df.fillna(0)
         grades = (df.sum(axis=1) / len(problem_list)).apply(self.__get_grade_scale)
