@@ -24,6 +24,8 @@ class ContestService:
             info = json.loads(request.text)
             result = []
             for submission in info['submissions']:
+                code = self.__get_code_text(contest_id, submission['id'])
+
                 result.append(YaContestSubmission(submission['id'],
                                                   submission['compiler'],
                                                   submission['submissionTime'],
@@ -36,8 +38,16 @@ class ContestService:
                                                   submission['verdict'],
                                                   submission['test'],
                                                   submission['score'],
+                                                  code,
                                                   submission))
             return result
+
+    def __get_code_text(self, contest_id, submission_id):
+        api_url_code = self.__get_code_submission_url(contest_id, submission_id)
+        response = req.get(api_url_code, headers=self.__headers)
+        if response.status_code != 200:
+            raise Exception('error in getting code text')
+        return response.text
 
     def get_list_problems(self,
                           contest_id: str) -> list[str]:
@@ -56,6 +66,8 @@ class ContestService:
     def __get_list_problems_url(self, contest_id, locale='ru'):
         return f'https://api.contest.yandex.net/api/public/v2/contests/{contest_id}/problems?locale={locale}'
 
+    def __get_code_submission_url(self, contest_id, submission_id):
+        return f'https://api.contest.yandex.net/api/public/v2/contests/{contest_id}/submissions/{submission_id}/source'
 
     def __str__(self):
         string_presentation = ''

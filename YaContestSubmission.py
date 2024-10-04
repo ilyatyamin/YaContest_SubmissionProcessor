@@ -12,6 +12,7 @@ class YaContestSubmission:
                  verdict: str,
                  falled_test: str,
                  score: int,
+                 code: str,
                  other_info):
         self.id = id
         self.compiler = compiler
@@ -25,6 +26,7 @@ class YaContestSubmission:
         self.verdict = verdict
         self.falled_test = falled_test
         self.score = score
+        self.code_submission = code
         self.other_info = other_info
 
     def is_submission_correct(self):
