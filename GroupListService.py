@@ -10,4 +10,5 @@ class GroupListService:
 
     def get_list_of_group(self,
                           column_name: str):
-        return list(self.data[column_name])
+        series = self.data[column_name]
+        return list(series[~series.isnull()])

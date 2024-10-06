@@ -1,10 +1,12 @@
 import requests as req
 import json
 
+import tqdm
+
 from YaContestSubmission import YaContestSubmission
 
 
-class ContestService:
+class ApiContestService:
     def __init__(self,
                  secret_code: str):
         self.__secret_code = secret_code
@@ -14,7 +16,8 @@ class ContestService:
 
     def get_submissions(self,
                         contest_id: str,
-                        page_size=10 ** 5) -> list[YaContestSubmission]:
+                        page_size=10 ** 4,
+                        only_ok = True) -> list[YaContestSubmission]:
         api_url = self.__get_all_submissions_url(contest_id, page_size)
         request = req.get(api_url, headers=self.__headers)
 
@@ -23,24 +26,31 @@ class ContestService:
         else:
             info = json.loads(request.text)
             result = []
-            for submission in info['submissions']:
-                code = self.__get_code_text(contest_id, submission['id'])
+            for submission in tqdm.tqdm(info['submissions']):
+                code = None
 
-                result.append(YaContestSubmission(submission['id'],
-                                                  submission['compiler'],
-                                                  submission['submissionTime'],
-                                                  submission['author'],
-                                                  submission['authorId'],
-                                                  submission['problemId'],
-                                                  submission['problemAlias'],
-                                                  submission['time'],
-                                                  submission['memory'],
-                                                  submission['verdict'],
-                                                  submission['test'],
-                                                  submission['score'],
-                                                  code,
-                                                  submission))
+                if (only_ok and submission['verdict'].upper().strip() == 'OK') or not only_ok:
+                    if submission['verdict'].upper().strip() == 'OK':
+                        result.append(YaContestSubmission(submission['id'],
+                                                          submission['compiler'],
+                                                          submission['submissionTime'],
+                                                          submission['author'],
+                                                          submission['authorId'],
+                                                          submission['problemId'],
+                                                          submission['problemAlias'],
+                                                          submission['time'],
+                                                          submission['memory'],
+                                                          submission['verdict'],
+                                                          submission['test'],
+                                                          submission['score'],
+                                                          code,
+                                                          submission))
+
             return result
+
+    def fill_submission_list_by_code(self, submissions: list[YaContestSubmission], contest_id):
+        for submission in tqdm.tqdm(submissions):
+            submission.code_submission = self.__get_code_text(contest_id, submission.id)
 
     def __get_code_text(self, contest_id, submission_id):
         api_url_code = self.__get_code_submission_url(contest_id, submission_id)
