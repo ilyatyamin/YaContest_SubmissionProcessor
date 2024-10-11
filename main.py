@@ -5,14 +5,14 @@ from GroupListService import GroupListService
 from SubmissionAnalyzer import SubmissionAnalyzer
 
 # --------------------- SETTINGS, CHANGE IT --------------------------
-analyzed_group = 'ИХТ-121/1'  # CHANGE IT
-contest_id = "68407"  # CHANGE IT
+analyzed_group = 'IHL-121'  # CHANGE IT
+contest_id = "68815"  # CHANGE IT
 deadline = datetime.datetime(year=2024,
                              month=10,
-                             day=5,
-                             hour=13,
-                             minute=10,
-                             second=0)  # CHANGE IT, write your local time
+                             day=11,
+                             hour=21,
+                             minute=59,
+                             second=59)  # CHANGE IT, write your local time
 # --------------------- SETTINGS, CHANGE IT --------------------------
 
 
@@ -28,10 +28,10 @@ submissions = service.get_submissions(contest_id, only_ok=True)
 pl_list = []
 
 # decomment if you need plagiat check
-# service.fill_submission_list_by_code(submissions, contest_id)
+# service.fill_submission_list_by_code(submissions, contest_id, tasks_to_checked=['H', 'I'])
 # pl_list = analyzer.plagiat_checker(submissions,
 #                                    percent_plagiat=0.9,
-#                                    excluded_tasks=['A', 'B', 'C', 'D', 'E', 'F', 'G'])
+#                                    tasks_to_check=['H', 'I'])
 
 stats = analyzer.get_statistics(group_list.get_list_of_group(analyzed_group),
                                 submissions,

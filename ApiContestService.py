@@ -1,3 +1,5 @@
+from typing import Optional
+
 import requests as req
 import json
 
@@ -48,9 +50,13 @@ class ApiContestService:
 
             return result
 
-    def fill_submission_list_by_code(self, submissions: list[YaContestSubmission], contest_id):
+    def fill_submission_list_by_code(self,
+                                     submissions: list[YaContestSubmission],
+                                     contest_id,
+                                     tasks_to_checked: Optional[list[str]] = None):
         for submission in tqdm.tqdm(submissions):
-            submission.code_submission = self.__get_code_text(contest_id, submission.id)
+            if tasks_to_checked is None or submission.problem_alias in tasks_to_checked:
+                submission.code_submission = self.__get_code_text(contest_id, submission.id)
 
     def __get_code_text(self, contest_id, submission_id):
         api_url_code = self.__get_code_submission_url(contest_id, submission_id)

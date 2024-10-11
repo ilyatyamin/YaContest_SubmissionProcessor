@@ -45,9 +45,9 @@ class SubmissionAnalyzer:
         return df
 
     def plagiat_checker(self, submissions: list[YaContestSubmission],
-                        excluded_tasks=None,
+                        tasks_to_check=None,
                         percent_plagiat=0.8) -> list[YaContestSubmission]:
-        folder_name = self.__create_folder_with_submissions(submissions, excluded_tasks)
+        folder_name = self.__create_folder_with_submissions(submissions, tasks_to_check)
         plagiat_list = set()
 
         for dir in os.listdir(folder_name):
@@ -83,12 +83,12 @@ Enter 1 if the given attempts should be considered as plagiarism, otherwise any 
 
     @staticmethod
     def __create_folder_with_submissions(submissions: list[YaContestSubmission],
-                                         excluded_tasks) -> str:
+                                         tasks_to_check) -> str:
         dr_repres = str(datetime.datetime.now()).replace(' ', '')
         folder_name = f'plagiat_{dr_repres}_{str(random.randint(0, 10 ** 10))}'
         os.makedirs(folder_name, exist_ok=True)
         for attempt in submissions:
-            if ((excluded_tasks is None or attempt.problem_alias not in excluded_tasks)
+            if ((tasks_to_check is None or attempt.problem_alias in tasks_to_check)
                     and attempt.verdict.lower() == 'ok'):
                 os.makedirs(f"{folder_name}/{attempt.problem_alias}", exist_ok=True)
 
