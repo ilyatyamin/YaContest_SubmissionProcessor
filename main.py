@@ -5,14 +5,14 @@ from GroupListService import GroupListService
 from SubmissionAnalyzer import SubmissionAnalyzer
 
 # --------------------- SETTINGS, CHANGE IT --------------------------
-analyzed_group = 'IHL-121'  # CHANGE IT
-contest_id = "68815"  # CHANGE IT
+analyzed_group = 'IHL-111'  # CHANGE IT
+contest_id = "69172"  # CHANGE IT
 deadline = datetime.datetime(year=2024,
                              month=10,
-                             day=11,
-                             hour=21,
-                             minute=59,
-                             second=59)  # CHANGE IT, write your local time
+                             day=21,
+                             hour=20,
+                             minute=00,
+                             second=00)  # CHANGE IT, write your local time
 # --------------------- SETTINGS, CHANGE IT --------------------------
 
 
@@ -28,14 +28,18 @@ submissions = service.get_submissions(contest_id, only_ok=True)
 pl_list = []
 
 # decomment if you need plagiat check
-# service.fill_submission_list_by_code(submissions, contest_id, tasks_to_checked=['H', 'I'])
+tasks_to_be_checked = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I']
+# service.fill_submission_list_by_code(submissions, contest_id, tasks_to_checked=tasks_to_be_checked)
 # pl_list = analyzer.plagiat_checker(submissions,
 #                                    percent_plagiat=0.9,
-#                                    tasks_to_check=['H', 'I'])
+#                                    tasks_to_check=tasks_to_be_checked)
 
-stats = analyzer.get_statistics(group_list.get_list_of_group(analyzed_group),
-                                submissions,
-                                service.get_list_problems(contest_id),
-                                pl_list,
-                                deadline)
+stats = analyzer.get_statistics(group_list=group_list.get_list_of_group(analyzed_group),
+                                submissions=submissions,
+                                obligatory_problems=[pr for pr in service.get_list_problems(contest_id) if
+                                                     '*' not in pr],
+                                plagiat_list=pl_list,
+                                deadline=deadline,
+                                extra_problems=[pr for pr in service.get_list_problems(contest_id) if '*' in pr])
+print(pl_list)
 stats.to_csv(path_to_save + '.csv')

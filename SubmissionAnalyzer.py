@@ -19,22 +19,30 @@ class SubmissionAnalyzer:
     def get_statistics(self,
                        group_list: list[str],
                        submissions: list[YaContestSubmission],
-                       problem_list: list[str],
+                       obligatory_problems: list[str],
                        plagiat_list: list[YaContestSubmission],
+                       extra_problems: list[str] = None,
                        deadline: Optional[datetime.datetime] = None):
-        df = pd.DataFrame(columns=problem_list,
+        all_problems = obligatory_problems + extra_problems
+
+        df = pd.DataFrame(columns=all_problems + ['grades'] + ['additional_info'],
                           index=group_list)
         df = df.fillna(0)
+        df['additional_info'] = ""
 
         for submission in submissions:
-            if submission.author_name in group_list:
+            name = self.__process_fio(submission.author_name)
+            if name in group_list:
                 is_delayed = self.__get_is_delayed_status(deadline, submission)
 
-                if df.loc[submission.author_name, submission.problem_alias] != 1 and not is_delayed:
-                    df.loc[submission.author_name, submission.problem_alias] = int(submission.is_submission_correct())
-        grades = (df.sum(axis=1) / (len(problem_list))).apply(self.__get_grade_scale)
+                if df.loc[name, submission.problem_alias] != 1 and not is_delayed:
+                    df.loc[name, submission.problem_alias] = int(submission.is_submission_correct())
+
+                    if submission.problem_alias in extra_problems and int(submission.is_submission_correct()) == 1:
+                        df.loc[name, 'additional_info'] += f"solved extra problem {submission.problem_alias}. "
+
+        grades = (df[obligatory_problems].sum(axis=1) / (len(obligatory_problems))).apply(self.__get_grade_scale)
         df['grades'] = grades
-        df['additional_info'] = ''
 
         # get plagiat list
         for plagiat in plagiat_list:
@@ -80,6 +88,10 @@ Enter 1 if the given attempts should be considered as plagiarism, otherwise any 
                 sys.stdout.flush()
         self.__delete_folder_with_submissions(folder_name)
         return [next(subm for subm in submissions if subm.id == plagiat_id) for plagiat_id in plagiat_list]
+
+    @staticmethod
+    def __process_fio(fio: str):
+        return ' '.join(fio.split())
 
     @staticmethod
     def __create_folder_with_submissions(submissions: list[YaContestSubmission],
@@ -131,7 +143,7 @@ Enter 1 if the given attempts should be considered as plagiarism, otherwise any 
             return 3
         elif 51 <= percent <= 74:
             return 4
-        elif 75 <= percent <= 100:
+        elif percent >= 75:
             return 5
         else:
-            raise Exception(f"wrong percent. need to be [0, 100], got {percent}")
+            raise Exception("starnge number")
