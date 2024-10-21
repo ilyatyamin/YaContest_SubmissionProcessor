@@ -41,7 +41,7 @@ class SubmissionAnalyzer:
                     if submission.problem_alias in extra_problems and int(submission.is_submission_correct()) == 1:
                         df.loc[name, 'additional_info'] += f"solved extra problem {submission.problem_alias}. "
 
-        grades = (df[obligatory_problems].sum(axis=1) / (len(obligatory_problems))).apply(self.__get_grade_scale)
+        grades = (df[all_problems].sum(axis=1) / (len(obligatory_problems))).apply(self.__get_grade_scale)
         df['grades'] = grades
 
         # get plagiat list
